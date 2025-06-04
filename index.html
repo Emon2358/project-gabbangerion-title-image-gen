@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>3D Metallic Text Generator</title>
-  <!-- Three.js 本体 (r150 以上) を CDN から読み込む -->
+
+  <!-- Three.js 本体（グローバルに THREE を定義） -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script>
-  <!-- フォントローダー用 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/examples/jsm/loaders/FontLoader.js"></script>
-  <!-- テキストジオメトリ用 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/examples/jsm/geometries/TextGeometry.js"></script>
-  <!-- OrbitControls（任意。視点操作用） -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/examples/jsm/controls/OrbitControls.js"></script>
+  <!-- FontLoader（examples/js 版＝UMD。グローバルに THREE.FontLoader を定義してくれる） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/examples/js/loaders/FontLoader.js"></script>
+  <!-- TextGeometry（examples/js 版＝UMD。グローバルに THREE.TextGeometry を定義してくれる） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/examples/js/geometries/TextGeometry.js"></script>
+  <!-- OrbitControls（examples/js 版＝UMD。グローバルに THREE.OrbitControls を定義してくれる） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/examples/js/controls/OrbitControls.js"></script>
 
   <style>
     html, body {
@@ -67,7 +68,7 @@
     </div>
     <div style="margin-top:8px;">
       <label for="colorInput">テキストカラー：</label>
-      <input type="color" id="colorInput" value="#d4c19f" /> <!-- デフォルトでゴールド系 -->
+      <input type="color" id="colorInput" value="#d4c19f" />
     </div>
   </div>
 
@@ -83,7 +84,6 @@
     init();
     animate();
 
-    // 初期化関数
     function init() {
       // 1) シーンとカメラ
       scene = new THREE.Scene();
@@ -100,10 +100,9 @@
       container.appendChild(renderer.domElement);
 
       // 3) ライティング
-      // アンビエントライト（全体に柔らかい光をあてる）
       const ambient = new THREE.AmbientLight(0xffffff, 0.3);
       scene.add(ambient);
-      // ディレクショナルライト（強い光源を２つ設置して立体感を強調）
+
       const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
       dirLight1.position.set(50, 50, 50);
       scene.add(dirLight1);
@@ -112,14 +111,13 @@
       dirLight2.position.set(-50, -20, -50);
       scene.add(dirLight2);
 
-      // 4) OrbitControls（視点操作が不要ならコメントアウト可）
+      // 4) OrbitControls（任意で視点操作を許可）
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.1;
 
       // 5) フォントをロードしてテキストを最初に生成
       const loader = new THREE.FontLoader();
-      // ここでは Three.js CDN から標準の Helvetiker フォントを取得
       loader.load(
         'https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/examples/fonts/helvetiker_regular.typeface.json',
         function (loadedFont) {
@@ -134,14 +132,14 @@
 
       // 6) リサイズ対応
       window.addEventListener('resize', onWindowResize);
-      // 7) UIの更新ボタン
+
+      // 7) UI の更新ボタン
       document.getElementById('updateBtn').addEventListener('click', () => {
         const newText = document.getElementById('textInput').value;
         updateText(newText);
       });
     }
 
-    // ウィンドウリサイズ時の処理
     function onWindowResize() {
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -156,7 +154,7 @@
     function createTextMesh(text) {
       if (!font) return;
 
-      // 既存のメッシュがあれば削除
+      // 既存のメッシュを破棄
       if (textMesh) {
         scene.remove(textMesh);
         textMesh.geometry.dispose();
@@ -167,14 +165,14 @@
       // TextGeometry の設定
       const textGeometry = new THREE.TextGeometry(text, {
         font: font,
-        size: 8,          // フォントサイズ
-        height: 3,        // 奥行き（厚み）
-        curveSegments: 12, // カーブの細かさ
-        bevelEnabled: true,    // ベベルを付ける
-        bevelThickness: 0.5,   // ベベルの厚み
-        bevelSize: 0.3,        // ベベルの面張り量
+        size: 8,
+        height: 3,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 0.5,
+        bevelSize: 0.3,
         bevelOffset: 0,
-        bevelSegments: 3       // ベベルの分割数
+        bevelSegments: 3
       });
 
       // ジオメトリの中心を原点に揃える
@@ -185,7 +183,7 @@
 
       // マテリアル（メタリック感を出す）
       const material = new THREE.MeshPhongMaterial({
-        color: document.getElementById('colorInput').value, // カラー入力から取得
+        color: document.getElementById('colorInput').value,
         shininess: 100,
         specular: 0xffffff,
       });
@@ -194,7 +192,6 @@
       scene.add(textMesh);
     }
 
-    // UI から文字列を受け取ってテキストを更新
     function updateText(newText) {
       createTextMesh(newText);
     }
@@ -205,7 +202,7 @@
     function animate() {
       requestAnimationFrame(animate);
 
-      // 少しだけ回転させる（任意）
+      // テキストを少し回転させる（不要なら削除可）
       if (textMesh) {
         textMesh.rotation.y += 0.005;
       }
